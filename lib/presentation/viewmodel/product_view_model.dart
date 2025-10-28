@@ -73,7 +73,7 @@ class ProductViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> removeFromCartWithError(ProductModel product) async {
+  Future<void> removeFromCartWith(ProductModel product) async {
     await Future.delayed(const Duration(milliseconds: 300));
     final hasError = DateTime.now().millisecond % 2 == 0;
     if (hasError) {

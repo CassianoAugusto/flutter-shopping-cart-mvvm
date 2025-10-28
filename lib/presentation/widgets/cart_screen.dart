@@ -50,9 +50,7 @@ class CartScreen extends StatelessWidget {
                                     ),
                                     onPressed: () async {
                                       try {
-                                        await vm.removeFromCartWithError(
-                                          product,
-                                        );
+                                        await vm.removeFromCartWith(product);
                                       } catch (e) {
                                         ScaffoldMessenger.of(
                                           context,
@@ -127,9 +125,23 @@ class CartScreen extends StatelessWidget {
                                       );
                                     }
                                   },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blue,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              textStyle: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                             child: vm.isLoading
-                                ? const CircularProgressIndicator(
-                                    color: Colors.white,
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
                                   )
                                 : const Text("Finalizar Pedido"),
                           ),
