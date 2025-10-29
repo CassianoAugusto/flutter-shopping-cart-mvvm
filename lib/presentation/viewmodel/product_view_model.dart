@@ -87,17 +87,14 @@ class ProductViewModel extends ChangeNotifier {
     if (!_disposed) notifyListeners();
   }
 
-  Future<void> removeFromCart(ProductModel product) async {
-    final Result<void> result = await removeFromCartCommand.execute(
-      product.id,
-      _cart,
-    );
-    if (result.isSuccess) {
-      _cart.remove(product.id);
-      if (!_disposed) notifyListeners();
+  void removeFromCart(ProductModel product) {
+    final current = _cart[product.id] ?? 0;
+    if (current > 1) {
+      _cart[product.id] = current - 1;
     } else {
-      throw Exception(result.error);
+      _cart.remove(product.id);
     }
+    notifyListeners();
   }
 
   Future<Result<void>> checkout() async {
