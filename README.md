@@ -45,7 +45,6 @@ flutter run
 
 ---
 
-## dio_logger → logs de requisição/resposta (opcional)
 
 # Android
 
