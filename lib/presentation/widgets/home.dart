@@ -1,18 +1,20 @@
-import 'package:app_carrinho_de_compras/presentation/widgets/cart_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../injections/app_injection.dart';
 import '../viewmodel/product_view_model.dart';
 import '../widgets/product_card.dart';
+import '../widgets/cart_screen.dart';
 import '../widgets/connection_error_page.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  final ProductViewModel? viewModel;
+  const HomeScreen({super.key, this.viewModel});
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => AppInjection.productViewModel..loadProducts(),
+    return ChangeNotifierProvider<ProductViewModel>.value(
+      value: viewModel ?? AppInjection.productViewModel
+        ..loadProducts(),
       child: Consumer<ProductViewModel>(
         builder: (context, vm, _) => Scaffold(
           appBar: AppBar(

@@ -16,6 +16,7 @@ class ProductCard extends StatelessWidget {
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           AspectRatio(
@@ -34,6 +35,7 @@ class ProductCard extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(8),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
@@ -54,7 +56,6 @@ class ProductCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-
                 quantity == 0
                     ? SizedBox(
                         width: double.infinity,
@@ -69,11 +70,11 @@ class ProductCard extends StatelessWidget {
                               ),
                             );
                           },
-                          icon: Icon(
+                          icon: const Icon(
                             Icons.shopping_cart_rounded,
                             color: Colors.blue,
                           ),
-                          label: Text(
+                          label: const Text(
                             "Adicionar",
                             style: TextStyle(color: Colors.blue),
                           ),
