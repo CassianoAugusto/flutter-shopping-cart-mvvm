@@ -1,106 +1,114 @@
-import 'package:flutter/material.dart';
+import 'package:app_carrinho_de_compras/domain/commands/checkout_command.dart';
+import 'package:flutter/foundation.dart';
 import '../../data/models/product_model.dart';
 import '../../domain/commands/fetch_products_command.dart';
+import '../../core/result.dart';
 
 class ProductViewModel extends ChangeNotifier {
-  final FetchProductsCommand _fetchProductsCommand;
+  final FetchProductsCommand fetchProductsCommand;
+  final CheckoutCommand checkoutCommand;
 
-  ProductViewModel(this._fetchProductsCommand);
-
-  List<ProductModel> _products = [];
+  final List<ProductModel> _products = [];
+  final Map<int, int> _cart = {};
   bool _isLoading = false;
   String? _error;
+  bool _disposed = false;
 
-  final Map<int, int> _cart = {};
+  ProductViewModel({
+    required this.fetchProductsCommand,
+    required this.checkoutCommand,
+  });
 
-  List<ProductModel> get products => _products;
+  List<ProductModel> get products => List.unmodifiable(_products);
+  int get cartCount => _cart.values.fold(0, (a, b) => a + b);
   bool get isLoading => _isLoading;
   String? get error => _error;
 
-  int get cartCount => _cart.values.fold(0, (sum, q) => sum + q);
+  double get subtotal => _cart.entries.fold(0, (sum, entry) {
+    final product = _products.firstWhere(
+      (p) => p.id == entry.key,
+      orElse: () => ProductModel(
+        id: entry.key,
+        title: 'Produto',
+        price: 0,
+        image: '',
+        description: '',
+        category: '',
+      ),
+    );
+    return sum + product.price * entry.value;
+  });
+
+  double get shipping => 12.0;
+  double get total => subtotal + shipping;
+
   int getProductQuantity(int productId) => _cart[productId] ?? 0;
-
   double getSubtotal(ProductModel product) =>
-      product.price * getProductQuantity(product.id);
+      product.price * (_cart[product.id] ?? 0);
 
-  double getTotal() => _cart.entries
-      .map((e) {
-        final product = _products.firstWhere(
-          (p) => p.id == e.key,
-          orElse: () => ProductModel(
-            id: e.key,
-            title: 'Produto',
-            price: 0,
-            image: '',
-            description: '',
-            category: '',
-          ),
-        );
-        return product.price * e.value;
-      })
-      .fold(0, (sum, val) => sum + val);
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
+
+  void _setLoading(bool value) {
+    _isLoading = value;
+    if (!_disposed) notifyListeners();
+  }
+
+  void _setError(String? value) {
+    _error = value;
+    if (!_disposed) notifyListeners();
+  }
 
   Future<void> loadProducts() async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
+    _setLoading(true);
+    _setError(null);
 
-    final result = await _fetchProductsCommand.execute();
+    final Result<List<ProductModel>> result = await fetchProductsCommand
+        .execute();
+
     if (result.isSuccess) {
-      _products = result.data!;
+      _products.clear();
+      _products.addAll(result.data!);
     } else {
-      _error = result.error;
+      _setError(result.error);
     }
 
-    _isLoading = false;
-    notifyListeners();
+    _setLoading(false);
   }
 
   void addToCart(ProductModel product) {
     _cart[product.id] = (_cart[product.id] ?? 0) + 1;
-    notifyListeners();
+    if (!_disposed) notifyListeners();
   }
 
   void removeFromCart(ProductModel product) {
-    if (_cart.containsKey(product.id)) {
-      final current = _cart[product.id]!;
-      if (current > 1) {
-        _cart[product.id] = current - 1;
-      } else {
-        _cart.remove(product.id);
-      }
-      notifyListeners();
-    }
-  }
-
-  Future<void> removeFromCartWith(ProductModel product) async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    final hasError = DateTime.now().millisecond % 2 == 0;
-    if (hasError) {
-      throw Exception("Erro ao remover o item do carrinho.");
+    final current = _cart[product.id] ?? 0;
+    if (current > 1) {
+      _cart[product.id] = current - 1;
     } else {
-      removeFromCart(product);
+      _cart.remove(product.id);
     }
+    notifyListeners();
   }
 
-  Future<void> checkout() async {
-    _isLoading = true;
-    notifyListeners();
+  Future<Result<void>> checkout() async {
+    _setLoading(true);
 
-    try {
-      await Future.delayed(const Duration(seconds: 2));
-
-      final success = DateTime.now().millisecond % 2 == 0;
-
-      if (!success) {
-        throw Exception("Erro no checkout");
-      }
-
+    final result = await checkoutCommand.execute(Map.from(_cart));
+    if (result.isSuccess) {
       _cart.clear();
-      notifyListeners();
-    } finally {
-      _isLoading = false;
-      notifyListeners();
     }
+
+    _setLoading(false);
+    if (!_disposed) notifyListeners();
+    return result;
+  }
+
+  void clearCart() {
+    _cart.clear();
+    if (!_disposed) notifyListeners();
   }
 }

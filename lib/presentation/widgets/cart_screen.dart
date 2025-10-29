@@ -1,7 +1,7 @@
-import 'package:app_carrinho_de_compras/presentation/widgets/order_complete_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../viewmodel/product_view_model.dart';
+import '../../presentation/viewmodel/product_view_model.dart';
+import '../../core/routes/app_routes.dart';
 
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
@@ -10,25 +10,22 @@ class CartScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<ProductViewModel>(
       builder: (context, vm, _) {
-        final cartItems = vm.products
+        final cartProducts = vm.products
             .where((p) => vm.getProductQuantity(p.id) > 0)
             .toList();
 
         return Scaffold(
-          appBar: AppBar(title: const Text("Carrinho")),
-          body: cartItems.isEmpty
-              ? const Center(child: Text("Carrinho vazio"))
+          appBar: AppBar(title: const Text('Carrinho')),
+          body: cartProducts.isEmpty
+              ? const Center(child: Text('Carrinho vazio'))
               : Column(
                   children: [
                     Expanded(
-                      child: ListView.separated(
-                        padding: const EdgeInsets.all(10),
-                        itemCount: cartItems.length,
-                        separatorBuilder: (_, __) => const Divider(),
+                      child: ListView.builder(
+                        itemCount: cartProducts.length,
                         itemBuilder: (context, index) {
-                          final product = cartItems[index];
+                          final product = cartProducts[index];
                           final quantity = vm.getProductQuantity(product.id);
-                          final subtotal = vm.getSubtotal(product);
                           return ListTile(
                             leading: Image.network(
                               product.image,
@@ -38,112 +35,92 @@ class CartScreen extends StatelessWidget {
                             ),
                             title: Text(product.title),
                             subtitle: Text(
-                              "Unitário: R\$ ${product.price.toStringAsFixed(2)}\nSubtotal: R\$ ${subtotal.toStringAsFixed(2)}",
+                              ' Qtd: $quantity\n Unitário: R\$ ${product.price.toStringAsFixed(2)}',
                             ),
-                            trailing: SizedBox(
-                              width: 120,
-                              child: Row(
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(
-                                      Icons.remove_circle_outline,
-                                    ),
-                                    onPressed: () async {
-                                      try {
-                                        await vm.removeFromCartWith(product);
-                                      } catch (e) {
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          SnackBar(content: Text(e.toString())),
-                                        );
-                                      }
-                                    },
-                                  ),
-                                  Text(
-                                    quantity.toString(),
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.add_circle_outline),
-                                    onPressed: () {
-                                      vm.addToCart(product);
-                                    },
-                                  ),
-                                ],
-                              ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.remove_circle_outline),
+                                  onPressed: () => vm.removeFromCart(product),
+                                ),
+                                Text(quantity.toString()),
+                                IconButton(
+                                  icon: const Icon(Icons.add_circle_outline),
+                                  onPressed: () => vm.addToCart(product),
+                                ),
+                              ],
                             ),
                           );
                         },
                       ),
                     ),
-                    Container(
+                    Padding(
                       padding: const EdgeInsets.all(16),
-
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Text(
-                            "Subtotal: R\$ ${cartItems.map((p) => vm.getSubtotal(p)).fold(0.0, (a, b) => a + b).toStringAsFixed(2)}",
-                            style: const TextStyle(fontSize: 16),
-                          ),
-                          const SizedBox(height: 4),
-                          const Text(
-                            "Frete: R\$ 12,00",
-                            style: TextStyle(fontSize: 16),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            "Total: R\$ ${(cartItems.map((p) => vm.getSubtotal(p)).fold(0.0, (a, b) => a + b) + 12).toStringAsFixed(2)}",
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                          _buildSummaryRow('Subtotal', vm.subtotal),
+                          _buildSummaryRow('Frete', vm.shipping),
+                          _buildSummaryRow('Total', vm.total, isTotal: true),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: () async {
+                                final cartProducts = vm.products
+                                    .where(
+                                      (p) => vm.getProductQuantity(p.id) > 0,
+                                    )
+                                    .toList();
 
-                          const SizedBox(height: 8),
-                          ElevatedButton(
-                            onPressed: vm.cartCount == 0
-                                ? null
-                                : () async {
-                                    try {
-                                      await vm.checkout();
-                                      Navigator.pushReplacement(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) =>
-                                              const OrderCompleteScreen(),
-                                        ),
-                                      );
-                                    } catch (e) {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        SnackBar(content: Text(e.toString())),
-                                      );
-                                    }
-                                  },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blue,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              textStyle: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
+                                if (cartProducts.isEmpty) return;
+
+                                final quantities = {
+                                  for (var p in cartProducts)
+                                    p.id: vm.getProductQuantity(p.id),
+                                };
+                                final subtotal = cartProducts.fold(
+                                  0.0,
+                                  (sum, p) => sum + p.price * quantities[p.id]!,
+                                );
+                                const shipping = 12.0;
+                                final total = subtotal + shipping;
+
+                                showDialog(
+                                  context: context,
+                                  barrierDismissible: false,
+                                  builder: (_) => const Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                );
+                                final result = await vm.checkout();
+                                Navigator.pop(context);
+
+                                if (result.isSuccess) {
+                                  Navigator.pushNamedAndRemoveUntil(
+                                    context,
+                                    AppRoutes.orderComplete,
+                                    (route) => false,
+                                    arguments: {
+                                      'products': cartProducts,
+                                      'quantities': quantities,
+                                      'subtotal': subtotal,
+                                      'total': total,
+                                    },
+                                  );
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.blue,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.all(14),
+                                textStyle: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
+                              child: const Text('Finalizar Pedido'),
                             ),
-                            child: vm.isLoading
-                                ? const SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                : const Text("Finalizar Pedido"),
                           ),
                         ],
                       ),
@@ -152,6 +129,31 @@ class CartScreen extends StatelessWidget {
                 ),
         );
       },
+    );
+  }
+
+  Widget _buildSummaryRow(String label, double value, {bool isTotal = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontWeight: isTotal ? FontWeight.bold : FontWeight.w400,
+              fontSize: isTotal ? 18 : 16,
+            ),
+          ),
+          Text(
+            'R\$ ${value.toStringAsFixed(2)}',
+            style: TextStyle(
+              fontWeight: isTotal ? FontWeight.bold : FontWeight.w400,
+              fontSize: isTotal ? 18 : 16,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

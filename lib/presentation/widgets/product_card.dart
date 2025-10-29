@@ -62,13 +62,6 @@ class ProductCard extends StatelessWidget {
                         child: ElevatedButton.icon(
                           onPressed: () {
                             vm.addToCart(product);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  '${product.title} adicionado ao carrinho!',
-                                ),
-                              ),
-                            );
                           },
                           icon: const Icon(
                             Icons.shopping_cart_rounded,

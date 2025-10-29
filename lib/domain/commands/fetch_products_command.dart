@@ -1,7 +1,6 @@
 import 'package:app_carrinho_de_compras/core/result.dart';
 import 'package:app_carrinho_de_compras/data/datasource/product_remote_darta_source.dart';
-
-import '../../data/models/product_model.dart';
+import 'package:app_carrinho_de_compras/data/models/product_model.dart';
 
 class FetchProductsCommand {
   final ProductRemoteDataSource _remoteDataSource;
