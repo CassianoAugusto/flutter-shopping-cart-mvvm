@@ -109,6 +109,9 @@ Responsável por buscar dados via API (FakeStore).
   ✅ Tela de pedido finalizado com opção “Novo Pedido”
   ✅ Navegação com **rotas nomeadas**
 
+
+---
+
 ## 🚀 Execução do Projeto
 
 ```bash
@@ -124,6 +127,8 @@ flutter pub get
 # Rodar o projeto
 flutter run
 ```
+
+---
 
 ## 🧭 Fluxo de Navegação
 
@@ -161,9 +166,11 @@ flutter run
           └─────────────────┘
 ```
 
+---
 
 ## 👨‍💻 Autor
 
 **Cassiano Simas**
 Desenvolvido como desafio Flutter com foco em boas práticas, arquitetura limpa e fluidez de experiência de compra.
-```
+
+
