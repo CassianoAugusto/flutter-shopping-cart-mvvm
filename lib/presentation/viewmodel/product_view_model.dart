@@ -12,6 +12,7 @@ class ProductViewModel extends ChangeNotifier {
   final Map<int, int> _cart = {};
   bool _isLoading = false;
   String? _error;
+  String? _message;
   bool _disposed = false;
 
   ProductViewModel({
@@ -23,6 +24,7 @@ class ProductViewModel extends ChangeNotifier {
   int get cartCount => _cart.values.fold(0, (a, b) => a + b);
   bool get isLoading => _isLoading;
   String? get error => _error;
+  String? get message => _message;
 
   double get subtotal => _cart.entries.fold(0, (sum, entry) {
     final product = _products.firstWhere(
@@ -62,6 +64,11 @@ class ProductViewModel extends ChangeNotifier {
     if (!_disposed) notifyListeners();
   }
 
+  void _setMessage(String? value) {
+    _message = value;
+    if (!_disposed) notifyListeners();
+  }
+
   Future<void> loadProducts() async {
     _setLoading(true);
     _setError(null);
@@ -70,8 +77,9 @@ class ProductViewModel extends ChangeNotifier {
         .execute();
 
     if (result.isSuccess) {
-      _products.clear();
-      _products.addAll(result.data!);
+      _products
+        ..clear()
+        ..addAll(result.data!);
     } else {
       _setError(result.error);
     }
@@ -79,9 +87,18 @@ class ProductViewModel extends ChangeNotifier {
     _setLoading(false);
   }
 
-  void addToCart(ProductModel product) {
+  bool addToCart(ProductModel product) {
+    final alreadyInCart = _cart.containsKey(product.id);
+    final distinctCount = _cart.length;
+
+    if (!alreadyInCart && distinctCount >= 10) {
+      _setMessage('Você só pode adicionar até 10 produtos diferentes.');
+      return false;
+    }
+
     _cart[product.id] = (_cart[product.id] ?? 0) + 1;
-    if (!_disposed) notifyListeners();
+    _setMessage(null);
+    return true;
   }
 
   void removeFromCart(ProductModel product) {
@@ -110,5 +127,9 @@ class ProductViewModel extends ChangeNotifier {
   void clearCart() {
     _cart.clear();
     if (!_disposed) notifyListeners();
+  }
+
+  void clearMessage() {
+    _setMessage(null);
   }
 }

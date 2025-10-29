@@ -60,9 +60,21 @@ class ProductCard extends StatelessWidget {
                         width: double.infinity,
                         child: ElevatedButton.icon(
                           onPressed: () {
-                            vm.addToCart(product);
+                            final added = vm.addToCart(product);
+                            if (!added) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Máximo de 10 unidades por produto.',
+                                  ),
+                                  backgroundColor: Colors.red,
+                                  duration: Duration(seconds: 2),
+                                ),
+                              );
+                            }
                           },
-                          icon: Icon(
+
+                          icon: const Icon(
                             Icons.shopping_cart_rounded,
                             color: Colors.blue,
                           ),
