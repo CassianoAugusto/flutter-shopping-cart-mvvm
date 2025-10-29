@@ -1,5 +1,4 @@
 import 'package:app_carrinho_de_compras/domain/commands/checkout_command.dart';
-import 'package:app_carrinho_de_compras/domain/commands/remove_from_cart_command.dart';
 import 'package:flutter/foundation.dart';
 import '../../data/models/product_model.dart';
 import '../../domain/commands/fetch_products_command.dart';
@@ -8,7 +7,6 @@ import '../../core/result.dart';
 class ProductViewModel extends ChangeNotifier {
   final FetchProductsCommand fetchProductsCommand;
   final CheckoutCommand checkoutCommand;
-  final RemoveFromCartCommand removeFromCartCommand;
 
   final List<ProductModel> _products = [];
   final Map<int, int> _cart = {};
@@ -19,7 +17,6 @@ class ProductViewModel extends ChangeNotifier {
   ProductViewModel({
     required this.fetchProductsCommand,
     required this.checkoutCommand,
-    required this.removeFromCartCommand,
   });
 
   List<ProductModel> get products => List.unmodifiable(_products);
@@ -87,17 +84,14 @@ class ProductViewModel extends ChangeNotifier {
     if (!_disposed) notifyListeners();
   }
 
-  Future<void> removeFromCart(ProductModel product) async {
-    final Result<void> result = await removeFromCartCommand.execute(
-      product.id,
-      _cart,
-    );
-    if (result.isSuccess) {
-      _cart.remove(product.id);
-      if (!_disposed) notifyListeners();
+  void removeFromCart(ProductModel product) {
+    final current = _cart[product.id] ?? 0;
+    if (current > 1) {
+      _cart[product.id] = current - 1;
     } else {
-      throw Exception(result.error);
+      _cart.remove(product.id);
     }
+    notifyListeners();
   }
 
   Future<Result<void>> checkout() async {

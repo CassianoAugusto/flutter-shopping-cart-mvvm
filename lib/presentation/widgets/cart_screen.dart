@@ -86,7 +86,16 @@ class CartScreen extends StatelessWidget {
                                 const shipping = 12.0;
                                 final total = subtotal + shipping;
 
+                                showDialog(
+                                  context: context,
+                                  barrierDismissible: false,
+                                  builder: (_) => const Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                );
                                 final result = await vm.checkout();
+                                Navigator.pop(context);
+
                                 if (result.isSuccess) {
                                   Navigator.pushNamedAndRemoveUntil(
                                     context,
