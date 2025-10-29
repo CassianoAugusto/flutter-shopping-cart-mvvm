@@ -1,20 +1,19 @@
-# app_carrinho_de_compras
+# 🛒 App Carrinho de Compras - Flutter (Arquitetura MVVM)
 
-Principais funcionalidades
+## 🎯 Objetivo
 
-Lista de produtos via FakeStoreAPI
+Aplicativo Flutter desenvolvido com **arquitetura MVVM**, simulando o fluxo completo de um carrinho de compras com consumo de API, estados reativos e persistência global de dados.
 
-Carrinho de compras com quantidade por item
+---
 
-Checkout simulado com delay
+## 🧠 Avaliação Baseada em
 
-Arquitetura MVVM com camadas separadas
-
-Gerenciamento de estado via ChangeNotifier
-
-Command/Result para ações encapsuladas (ex: fetchProducts)
-
-Injeção de dependências centralizada (AppInjection)
+- Aderência à arquitetura **MVVM** (Model-View-ViewModel)
+- Organização e clareza do código
+- Uso de **ChangeNotifier** e **Provider**
+- Tratamento de **loading**, **erro** e **sucesso**
+- Navegação via **rotas nomeadas**
+- UX consistente e regras de negócio aplicadas corretamente
 
 ---
 
@@ -26,7 +25,25 @@ Pacotes utilizados:
 
 dio → requisições HTTP
 
-provider → gerenciamento de estado (ChangeNotifier)
+---
+
+# Clonar o repositório
+
+git clone https://github.com/seu-usuario/app_carrinho_mvvm.git
+
+# Entrar na pasta
+
+cd app_carrinho_mvvm
+
+# Instalar dependências
+
+flutter pub get
+
+# Rodar o projeto
+
+flutter run
+
+---
 
 ## dio_logger → logs de requisição/resposta (opcional)
 
