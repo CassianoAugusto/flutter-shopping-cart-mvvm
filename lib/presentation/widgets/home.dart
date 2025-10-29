@@ -1,9 +1,10 @@
+import 'package:app_carrinho_de_compras/injections/app_injection.dart';
+import 'package:app_carrinho_de_compras/presentation/widgets/cart_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../viewmodel/product_view_model.dart';
 import '../widgets/product_card.dart';
 import '../widgets/connection_error_page.dart';
-import '../../core/routes/app_routes.dart';
 
 class HomeScreen extends StatefulWidget {
   final ProductViewModel? viewModel;
