@@ -1,5 +1,5 @@
+import 'package:app_carrinho_de_compras/core/routes/app_routes.dart';
 import 'package:app_carrinho_de_compras/injections/app_injection.dart';
-import 'package:app_carrinho_de_compras/presentation/widgets/cart_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../viewmodel/product_view_model.dart';
@@ -76,15 +76,7 @@ class _CartButton extends StatelessWidget {
       children: [
         IconButton(
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => ChangeNotifierProvider.value(
-                  value: vm,
-                  child: const CartScreen(),
-                ),
-              ),
-            );
+            Navigator.pushNamed(context, AppRoutes.cart, arguments: vm);
           },
           icon: const Icon(Icons.shopping_cart_outlined, size: 35),
         ),
